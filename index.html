@@ -1,66 +1,380 @@
-import React, { useEffect, useState } from "react"; import { motion } from "framer-motion"; import { Bot, Sword, Globe, Server, ShoppingCart, Phone, Wallet, Copy, CheckCircle, BadgePercent, ShieldCheck, Truck, MessageSquare, Moon, Sun } from "lucide-react"; import { Button } from "@/components/ui/button"; import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Harga Produk & Jasa</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide-react@0.263.1/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border-radius: 50px;
+            border: 2px solid #e5e7eb;
+            outline: none;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .search-input:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+        
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .category-tab {
+            padding: 10px 20px;
+            background: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e5e7eb;
+            font-weight: 500;
+        }
+        
+        .category-tab.active {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        @media (max-width: 768px) {
+            .price-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .price-actions {
+                align-self: flex-end;
+            }
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-// ---------------------- // Helpers & Data // ---------------------- const CURRENCY = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" });
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion, AnimatePresence } = framerMotion;
+        const { 
+            Copy, CheckCircle, PenLine, Smartphone, Palette, Shirt, 
+            Megaphone, Image, Globe, Server, Bot, Sword, Search,
+            MessageCircle, Phone, Mail, Heart
+        } = lucideReact.icons;
 
-const NOKOS = [ { name: "NOKOS INDONESIA", price: 6000 }, { name: "NOKOS PHILIPINA", price: 8000 }, { name: "NOKOS MALAYSIA", price: 20000 }, ];
+        // Komponen utama
+        function App() {
+            const [toast, setToast] = useState("");
+            const [searchQuery, setSearchQuery] = useState("");
+            const [activeCategory, setActiveCategory] = useState("all");
+            
+            const CURRENCY = new Intl.NumberFormat("id-ID", { 
+                style: "currency", 
+                currency: "IDR",
+                maximumFractionDigits: 0
+            });
 
-const OCHOBOT = [ { name: "OCHOBOT ENC V1", price: 10000 }, { name: "OCHOBOT ENC V2", price: 15000 }, { name: "OCHOBOT NO ENC V1", price: 15000 }, { name: "OCHOBOT NO ENC V2", price: 20000 }, ];
+            function handleCopy(text) {
+                navigator.clipboard.writeText(text);
+                setToast("Tersalin: " + text);
+                setTimeout(() => setToast(""), 2000);
+            }
+            
+            function openWhatsApp(orderText) {
+                const encodedText = encodeURIComponent(orderText);
+                window.open(`https://wa.me/62881011892305?text=${encodedText}`, "_blank");
+            }
 
-const DEATH_OATH = [ { name: "DEATH OATH V3 VIA TELE", price: 10000 }, { name: "DEATH OATH V3.2 VIA TELE", price: 15000 }, ];
+            const hargaNokos = [
+                {name:"NOKOS INDONESIA", price:6000, category: "nokos"},
+                {name:"NOKOS PHILIPINA", price:8000, category: "nokos"},
+                {name:"NOKOS MALAYSIA", price:20000, category: "nokos"},
+            ];
 
-const PANEL_RAM = [ { name: "1 GB", price: 1000 }, { name: "2 GB", price: 2000 }, { name: "3 GB", price: 3000 }, { name: "4 GB", price: 4000 }, { name: "5 GB", price: 5000 }, { name: "6 GB", price: 6000 }, { name: "7 GB", price: 7000 }, { name: "8 GB", price: 8000 }, { name: "9 GB", price: 9000 }, { name: "RAM UNLIMITED", price: 10000 }, ];
+            const hargaOchobot = [
+                {name:"OCHOBOT ENC V1", price:10000, category: "script"},
+                {name:"OCHOBOT ENC V2", price:15000, category: "script"},
+                {name:"OCHOBOT NO ENC V1", price:15000, category: "script"},
+                {name:"OCHOBOT NO ENC V2", price:20000, category: "script"},
+            ];
 
-const SERVICES = [ { name: "Jasa Rename Script", price: 10000 }, { name: "Jasa Rename Aplikasi", price: 10000 }, { name: "Jasa Design Logo", price: 30000 }, { name: "Jasa Design Baju", price: 20000 }, { name: "Jasa Push Channel WA", priceRange: "Rp5.000 - Rp50.000" }, { name: "Jasa Design Poster", price: 25000 }, ];
+            const hargaDeathOath = [
+                {name:"DEATH OATH V3 VIA TELE", price:10000, category: "script"},
+                {name:"DEATH OATH V3.2 VIA TELE", price:15000, category: "script"},
+            ];
 
-const PAYMENTS = [ { name: "DANA", number: "0881011892305" }, { name: "GoPay", number: "083872735426" }, { name: "OVO", number: "083872735426" }, ];
+            const jasaLayanan = [
+                {name:"Jasa Rename Script", price:10000, icon: <PenLine className="inline w-5 h-5 mr-2 text-blue-600"/>, category: "jasa"},
+                {name:"Jasa Rename Aplikasi", price:10000, icon: <Smartphone className="inline w-5 h-5 mr-2 text-blue-600"/>, category: "jasa"},
+                {name:"Jasa Design Logo", price:30000, icon: <Palette className="inline w-5 h-5 mr-2 text-blue-600"/>, category: "jasa"},
+                {name:"Jasa Design Baju", price:20000, icon: <Shirt className="inline w-5 h-5 mr-2 text-blue-600"/>, category: "jasa"},
+                {name:"Jasa Push Channel WA", price:"Rp5.000 - Rp50.000", icon: <Megaphone className="inline w-5 h-5 mr-2 text-blue-600"/>, category: "jasa"},
+                {name:"Jasa Design Poster", price:25000, icon: <Image className="inline w-5 h-5 mr-2 text-blue-600"/>, category: "jasa"},
+            ];
+            
+            // Menggabungkan semua data
+            const allItems = [
+                ...hargaNokos.map(item => ({...item, type: "NOKOS"})),
+                ...hargaOchobot.map(item => ({...item, type: "OCHOBOT"})),
+                ...hargaDeathOath.map(item => ({...item, type: "DEATH OATH"})),
+                ...jasaLayanan.map(item => ({...item, type: "JASA"}))
+            ];
+            
+            // Filter data berdasarkan pencarian dan kategori
+            const filteredItems = allItems.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchesCategory = activeCategory === "all" || item.category === activeCategory;
+                return matchesSearch && matchesCategory;
+            });
+            
+            const categories = [
+                { id: "all", name: "Semua Produk" },
+                { id: "nokos", name: "NOKOS" },
+                { id: "script", name: "Script" },
+                { id: "jasa", name: "Jasa & Layanan" }
+            ];
 
-const WA_NUMBER = "62881011892305"; // kontak toko
+            return (
+                <div className="max-w-4xl mx-auto py-8 px-4">
+                    {/* Header */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="hero-section"
+                    >
+                        <h1 className="text-3xl md:text-4xl font-bold mb-3">Daftar Harga Produk & Jasa</h1>
+                        <p className="text-lg opacity-90">Tersedia berbagai layanan digital dengan harga terjangkau</p>
+                    </motion.div>
+                    
+                    {/* Pencarian */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="search-container"
+                    >
+                        <Search className="search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Cari produk atau jasa..."
+                            className="search-input"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </motion.div>
+                    
+                    {/* Kategori */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="category-tabs"
+                    >
+                        {categories.map(category => (
+                            <div
+                                key={category.id}
+                                className={`category-tab ${activeCategory === category.id ? 'active' : ''}`}
+                                onClick={() => setActiveCategory(category.id)}
+                            >
+                                {category.name}
+                            </div>
+                        ))}
+                    </motion.div>
+                    
+                    {/* Daftar Harga */}
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        {filteredItems.length > 0 ? (
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                                {filteredItems.map((item, idx) => (
+                                    <motion.div 
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                        className="price-item"
+                                    >
+                                        <div className="flex items-center">
+                                            {item.icon || <div className="w-5 h-5 mr-2 bg-red-100 rounded-full flex items-center justify-center">
+                                                <i className="fas fa-tag text-red-600 text-xs"></i>
+                                            </div>}
+                                            <span className="font-medium">{item.name} - {typeof item.price === "number" ? CURRENCY.format(item.price) : item.price}</span>
+                                        </div>
+                                        <div className="price-actions flex space-x-2">
+                                            <button 
+                                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+                                                onClick={() => openWhatsApp(`Saya mau pesan ${item.name} (${typeof item.price === "number" ? CURRENCY.format(item.price) : item.price})`)}
+                                            >
+                                                <MessageCircle className="inline w-4 h-4 mr-1" />
+                                                Pesan
+                                            </button>
+                                            <button 
+                                                className="border border-gray-300 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition"
+                                                onClick={() => handleCopy(`${item.name} - ${typeof item.price === "number" ? CURRENCY.format(item.price) : item.price}`)}
+                                            >
+                                                <Copy className="inline w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-10 bg-white rounded-2xl shadow">
+                                <i className="fas fa-search text-4xl text-gray-300 mb-3"></i>
+                                <p className="text-gray-500">Tidak ada produk yang ditemukan</p>
+                            </div>
+                        )}
+                    </motion.div>
+                    
+                    {/* Info Kontak */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="mt-10 bg-white rounded-2xl shadow-lg p-6"
+                    >
+                        <h2 className="text-xl font-bold text-center mb-4">Hubungi Kami</h2>
+                        <div className="flex flex-wrap justify-center gap-4">
+                            <a href="https://wa.me/62881011892305" target="_blank" className="flex items-center text-green-600 font-medium">
+                                <Phone className="w-5 h-5 mr-2" />
+                                WhatsApp
+                            </a>
+                            <a href="mailto:contact@example.com" className="flex items-center text-blue-600 font-medium">
+                                <Mail className="w-5 h-5 mr-2" />
+                                Email
+                            </a>
+                        </div>
+                    </motion.div>
+                    
+                    {/* Footer */}
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="footer"
+                    >
+                        <p>© 2023 Daftar Harga Produk & Jasa. Made with <Heart className="inline w-4 h-4 text-red-500" /> for you.</p>
+                    </motion.div>
+                    
+                    {/* Toast Notification */}
+                    <AnimatePresence>
+                        {toast && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 20 }}
+                                className="toast-notification"
+                            >
+                                <CheckCircle className="w-5 h-5" />
+                                <span>{toast}</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        }
 
-function waLink(text) { return https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}; }
-
-// ---------------------- // Modern Store Component with Dark/Light Toggle // ---------------------- export default function App() { const [toast, setToast] = useState(""); const [theme, setTheme] = useState("light");
-
-// load theme from localStorage / prefers-color-scheme useEffect(() => { const ls = typeof window !== 'undefined' ? localStorage.getItem('theme') : null; const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; const initial = ls || (prefersDark ? 'dark' : 'light'); setTheme(initial); }, []);
-
-// apply theme to html element useEffect(() => { if (typeof document !== 'undefined') { const root = document.documentElement; if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark'); localStorage.setItem('theme', theme); } }, [theme]);
-
-const copy = (t) => { navigator.clipboard.writeText(t); setToast("Tersalin: " + t); setTimeout(() => setToast(""), 2000); };
-
-const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-
-return ( <div className="min-h-screen bg-gradient-to-b from-red-50 to-white dark:from-neutral-900 dark:to-neutral-950 text-neutral-800 dark:text-neutral-100"> {/* Navbar */} <header className="sticky top-0 z-40 backdrop-blur bg-white/70 dark:bg-neutral-900/70 border-b border-red-100 dark:border-neutral-800"> <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between"> <a href="#home" className="flex items-center gap-2"> <div className="h-9 w-9 rounded-xl bg-red-600 text-white grid place-content-center font-bold shadow">D4</div> <div className="font-extrabold text-lg tracking-tight">DANS4YOU</div> </a> <nav className="hidden md:flex items-center gap-6 text-sm"> <a href="#produk" className="hover:text-red-600 dark:hover:text-red-400">Produk</a> <a href="#jasa" className="hover:text-red-600 dark:hover:text-red-400">Jasa</a> <a href="#pembayaran" className="hover:text-red-600 dark:hover:text-red-400">Pembayaran</a> <a href="#kontak" className="hover:text-red-600 dark:hover:text-red-400">Kontak</a> </nav> <div className="flex items-center gap-2"> <Button variant="outline" className="border-red-200 dark:border-neutral-700" onClick={toggleTheme}> {theme === 'dark' ? (<div className="flex items-center gap-2"><Sun className="w-4 h-4"/> Light</div>) : (<div className="flex items-center gap-2"><Moon className="w-4 h-4"/> Dark</div>)} </Button> <Button asChild className="bg-red-600 hover:bg-red-700 text-white"> <a href={waLink("Halo, saya mau tanya produk/jasa DANS4YOU")}>Hubungi Kami</a> </Button> </div> </div> </header>
-
-{/* Hero */}
-  <section id="home" className="relative overflow-hidden">
-    <div className="mx-auto max-w-6xl px-4 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
-      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{duration:0.5}}>
-        <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
-          Toko Online <span className="text-red-600">Modern</span> untuk
-          <br /> Produk & Jasa Digital
-        </h1>
-        <p className="mt-4 text-neutral-700 dark:text-neutral-300 max-w-prose">
-          Nokos WhatsApp, Panel Pterodactyl, Script Ochobot, Script Death Oath, dan berbagai jasa kreatif. Warna tema dominan merah sesuai brand Anda.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
-            <a href="#produk">Lihat Produk</a>
-          </Button>
-          <Button asChild variant="outline" className="border-red-300 text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-neutral-800 dark:border-neutral-700">
-            <a href="#jasa">Lihat Jasa</a>
-          </Button>
-        </div>
-        <div className="mt-6 flex items-center gap-4 text-sm text-neutral-600 dark:text-neutral-400">
-          <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4"/> Trusted Seller</div>
-          <div className="flex items-center gap-2"><Truck className="w-4 h-4"/> Proses cepat</div>
-          <div className="flex items-center gap-2"><BadgePercent className="w-4 h-4"/> Voucher MERAH10</div>
-        </div>
-      </motion.div>
-      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{duration:0.6, delay:0.1}} className="relative">
-        <div className="aspect-[4/3] rounded-3xl bg-gradient-to-br from-red-600 to-red-400 dark:from-red-700 dark:to-red-500 shadow-2xl p-1">
-          <div className="h-full w-full rounded-3xl bg-white/10 dark:bg-black/20 backdrop-blur grid place-content-center text-white text-3xl font-bold">
-            DANS4YOU
-          </div>
-        </div>
+        // Render aplikasi
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>        </div>
       </motion.div>
     </div>
   </section>
