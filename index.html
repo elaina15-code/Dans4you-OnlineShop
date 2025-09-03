@@ -1,39 +1,309 @@
-import React, { useEffect, useMemo, useState } from "react"; import { motion } from "framer-motion"; import { Copy, CheckCircle, PenLine, Smartphone, Palette, Shirt, Megaphone, Image, Globe, Server, Bot, Sword } from "lucide-react"; import { Button } from "@/components/ui/button"; import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useEffect, useState } from "react"; import { motion } from "framer-motion"; import { Bot, Sword, Globe, Server, ShoppingCart, Phone, Wallet, Copy, CheckCircle, BadgePercent, ShieldCheck, Truck, MessageSquare, Moon, Sun } from "lucide-react"; import { Button } from "@/components/ui/button"; import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-const CURRENCY = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" });
+// ---------------------- // Helpers & Data // ---------------------- const CURRENCY = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" });
 
-export default function App() { const [toast, setToast] = useState("");
+const NOKOS = [ { name: "NOKOS INDONESIA", price: 6000 }, { name: "NOKOS PHILIPINA", price: 8000 }, { name: "NOKOS MALAYSIA", price: 20000 }, ];
 
-function handleCopy(text) { navigator.clipboard.writeText(text); setToast("Tersalin: " + text); setTimeout(() => setToast(""), 2000); }
+const OCHOBOT = [ { name: "OCHOBOT ENC V1", price: 10000 }, { name: "OCHOBOT ENC V2", price: 15000 }, { name: "OCHOBOT NO ENC V1", price: 15000 }, { name: "OCHOBOT NO ENC V2", price: 20000 }, ];
 
-const hargaNokos = [ {name:"NOKOS INDONESIA", price:6000}, {name:"NOKOS PHILIPINA", price:8000}, {name:"NOKOS MALAYSIA", price:20000}, ];
+const DEATH_OATH = [ { name: "DEATH OATH V3 VIA TELE", price: 10000 }, { name: "DEATH OATH V3.2 VIA TELE", price: 15000 }, ];
 
-const hargaOchobot = [ {name:"OCHOBOT ENC V1", price:10000}, {name:"OCHOBOT ENC V2", price:15000}, {name:"OCHOBOT NO ENC V1", price:15000}, {name:"OCHOBOT NO ENC V2", price:20000}, ];
+const PANEL_RAM = [ { name: "1 GB", price: 1000 }, { name: "2 GB", price: 2000 }, { name: "3 GB", price: 3000 }, { name: "4 GB", price: 4000 }, { name: "5 GB", price: 5000 }, { name: "6 GB", price: 6000 }, { name: "7 GB", price: 7000 }, { name: "8 GB", price: 8000 }, { name: "9 GB", price: 9000 }, { name: "RAM UNLIMITED", price: 10000 }, ];
 
-const hargaDeathOath = [ {name:"DEATH OATH V3 VIA TELE", price:10000}, {name:"DEATH OATH V3.2 VIA TELE", price:15000}, ];
+const SERVICES = [ { name: "Jasa Rename Script", price: 10000 }, { name: "Jasa Rename Aplikasi", price: 10000 }, { name: "Jasa Design Logo", price: 30000 }, { name: "Jasa Design Baju", price: 20000 }, { name: "Jasa Push Channel WA", priceRange: "Rp5.000 - Rp50.000" }, { name: "Jasa Design Poster", price: 25000 }, ];
 
-const jasaLayanan = [ {name:"Jasa Rename Script", price:10000, icon:<PenLine className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Rename Aplikasi", price:10000, icon:<Smartphone className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Design Logo", price:30000, icon:<Palette className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Design Baju", price:20000, icon:<Shirt className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Push Channel WA", price:"Rp5.000 - Rp50.000", icon:<Megaphone className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Design Poster", price:25000, icon:<Image className="w-4 h-4 inline mr-1"/>}, ];
+const PAYMENTS = [ { name: "DANA", number: "0881011892305" }, { name: "GoPay", number: "083872735426" }, { name: "OVO", number: "083872735426" }, ];
 
-return ( <div className="min-h-screen bg-red-50 text-neutral-800 p-4"> <h1 className="text-3xl font-bold text-red-700 mb-6 text-center">Daftar Harga Produk</h1>
+const WA_NUMBER = "62881011892305"; // kontak toko
 
-{/* Card Harga Nokos */}
-  <Card className="mt-6">
-    <CardHeader><CardTitle><Globe className="inline w-5 h-5 mr-2 text-red-600"/> Harga Nokos</CardTitle></CardHeader>
-    <CardContent>
-      {hargaNokos.map((item, idx) => (
-        <div key={idx} className="flex items-center justify-between border-b py-2">
-          <span>{item.name} - {CURRENCY.format(item.price)}</span>
-          <div className="space-x-2">
-            <Button size="sm" onClick={()=>window.open(`https://wa.me/62881011892305?text=Saya%20mau%20pesan%20${item.name}%20(${CURRENCY.format(item.price)})`, "_blank")}>Pesan Sekarang</Button>
-            <Button size="sm" variant="outline" onClick={()=>handleCopy(`${item.name} - ${CURRENCY.format(item.price)}`)}><Copy className="w-4 h-4"/></Button>
+function waLink(text) { return https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}; }
+
+// ---------------------- // Modern Store Component with Dark/Light Toggle // ---------------------- export default function App() { const [toast, setToast] = useState(""); const [theme, setTheme] = useState("light");
+
+// load theme from localStorage / prefers-color-scheme useEffect(() => { const ls = typeof window !== 'undefined' ? localStorage.getItem('theme') : null; const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; const initial = ls || (prefersDark ? 'dark' : 'light'); setTheme(initial); }, []);
+
+// apply theme to html element useEffect(() => { if (typeof document !== 'undefined') { const root = document.documentElement; if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark'); localStorage.setItem('theme', theme); } }, [theme]);
+
+const copy = (t) => { navigator.clipboard.writeText(t); setToast("Tersalin: " + t); setTimeout(() => setToast(""), 2000); };
+
+const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+
+return ( <div className="min-h-screen bg-gradient-to-b from-red-50 to-white dark:from-neutral-900 dark:to-neutral-950 text-neutral-800 dark:text-neutral-100"> {/* Navbar */} <header className="sticky top-0 z-40 backdrop-blur bg-white/70 dark:bg-neutral-900/70 border-b border-red-100 dark:border-neutral-800"> <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between"> <a href="#home" className="flex items-center gap-2"> <div className="h-9 w-9 rounded-xl bg-red-600 text-white grid place-content-center font-bold shadow">D4</div> <div className="font-extrabold text-lg tracking-tight">DANS4YOU</div> </a> <nav className="hidden md:flex items-center gap-6 text-sm"> <a href="#produk" className="hover:text-red-600 dark:hover:text-red-400">Produk</a> <a href="#jasa" className="hover:text-red-600 dark:hover:text-red-400">Jasa</a> <a href="#pembayaran" className="hover:text-red-600 dark:hover:text-red-400">Pembayaran</a> <a href="#kontak" className="hover:text-red-600 dark:hover:text-red-400">Kontak</a> </nav> <div className="flex items-center gap-2"> <Button variant="outline" className="border-red-200 dark:border-neutral-700" onClick={toggleTheme}> {theme === 'dark' ? (<div className="flex items-center gap-2"><Sun className="w-4 h-4"/> Light</div>) : (<div className="flex items-center gap-2"><Moon className="w-4 h-4"/> Dark</div>)} </Button> <Button asChild className="bg-red-600 hover:bg-red-700 text-white"> <a href={waLink("Halo, saya mau tanya produk/jasa DANS4YOU")}>Hubungi Kami</a> </Button> </div> </div> </header>
+
+{/* Hero */}
+  <section id="home" className="relative overflow-hidden">
+    <div className="mx-auto max-w-6xl px-4 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{duration:0.5}}>
+        <h1 className="text-4xl md:text-5xl font-extrabold leading-tight">
+          Toko Online <span className="text-red-600">Modern</span> untuk
+          <br /> Produk & Jasa Digital
+        </h1>
+        <p className="mt-4 text-neutral-700 dark:text-neutral-300 max-w-prose">
+          Nokos WhatsApp, Panel Pterodactyl, Script Ochobot, Script Death Oath, dan berbagai jasa kreatif. Warna tema dominan merah sesuai brand Anda.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
+            <a href="#produk">Lihat Produk</a>
+          </Button>
+          <Button asChild variant="outline" className="border-red-300 text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-neutral-800 dark:border-neutral-700">
+            <a href="#jasa">Lihat Jasa</a>
+          </Button>
+        </div>
+        <div className="mt-6 flex items-center gap-4 text-sm text-neutral-600 dark:text-neutral-400">
+          <div className="flex items-center gap-2"><ShieldCheck className="w-4 h-4"/> Trusted Seller</div>
+          <div className="flex items-center gap-2"><Truck className="w-4 h-4"/> Proses cepat</div>
+          <div className="flex items-center gap-2"><BadgePercent className="w-4 h-4"/> Voucher MERAH10</div>
+        </div>
+      </motion.div>
+      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{duration:0.6, delay:0.1}} className="relative">
+        <div className="aspect-[4/3] rounded-3xl bg-gradient-to-br from-red-600 to-red-400 dark:from-red-700 dark:to-red-500 shadow-2xl p-1">
+          <div className="h-full w-full rounded-3xl bg-white/10 dark:bg-black/20 backdrop-blur grid place-content-center text-white text-3xl font-bold">
+            DANS4YOU
           </div>
         </div>
-      ))}
-    </CardContent>
-  </Card>
+      </motion.div>
+    </div>
+  </section>
 
-  {/* Card Harga Script Ochobot */}
-  <Card className="mt-6">
+  {/* Produk */}
+  <section id="produk" className="mx-auto max-w-6xl px-4 py-12">
+    <h2 className="text-2xl md:text-3xl font-bold mb-6">Produk Unggulan</h2>
+    <div className="grid md:grid-cols-3 gap-6">
+      {/* Nokos */}
+      <Card className="rounded-2xl border-red-100 dark:border-neutral-800 dark:bg-neutral-900">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Globe className="text-red-600"/> Nokos WhatsApp</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">Pilih negara sesuai kebutuhan. Harga terjangkau, ready stok.</p>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="nokos-price">
+              <AccordionTrigger>Daftar Harga</AccordionTrigger>
+              <AccordionContent>
+                <ul className="space-y-2">
+                  {NOKOS.map((it, i) => (
+                    <li key={i} className="flex items-center justify-between text-sm">
+                      <span>{it.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{CURRENCY.format(it.price)}</span>
+                        <Button size="sm" asChild>
+                          <a href={waLink(`Saya mau pesan ${it.name} (${CURRENCY.format(it.price)})`)}>Pesan</a>
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => copy(`${it.name} - ${CURRENCY.format(it.price)}`)}>
+                          <Copy className="w-4 h-4"/>
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </CardContent>
+      </Card>
+
+      {/* Panel Pterodactyl */}
+      <Card className="rounded-2xl border-red-100 dark:border-neutral-800 dark:bg-neutral-900">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Server className="text-red-600"/> Panel Pterodactyl</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">Pilih paket RAM sesuai budget. Cocok untuk hosting bot/game server.</p>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="panel-ram">
+              <AccordionTrigger>List RAM & Harga</AccordionTrigger>
+              <AccordionContent>
+                <ul className="space-y-2">
+                  {PANEL_RAM.map((it, i) => (
+                    <li key={i} className="flex items-center justify-between text-sm">
+                      <span>{it.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{CURRENCY.format(it.price)}</span>
+                        <Button size="sm" asChild>
+                          <a href={waLink(`Saya mau pesan Panel ${it.name} (${CURRENCY.format(it.price)})`)}>Pesan</a>
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => copy(`${it.name} - ${CURRENCY.format(it.price)}`)}>
+                          <Copy className="w-4 h-4"/>
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </CardContent>
+      </Card>
+
+      {/* Scripts */}
+      <div className="grid gap-6">
+        <Card className="rounded-2xl border-red-100 dark:border-neutral-800 dark:bg-neutral-900">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Bot className="text-red-600"/> Script Ochobot</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="ochobot-price">
+                <AccordionTrigger>Daftar Harga</AccordionTrigger>
+                <AccordionContent>
+                  <ul className="space-y-2">
+                    {OCHOBOT.map((it, i) => (
+                      <li key={i} className="flex items-center justify-between text-sm">
+                        <span>{it.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{CURRENCY.format(it.price)}</span>
+                          <Button size="sm" asChild>
+                            <a href={waLink(`Saya mau pesan ${it.name} (${CURRENCY.format(it.price)})`)}>Pesan</a>
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => copy(`${it.name} - ${CURRENCY.format(it.price)}`)}>
+                            <Copy className="w-4 h-4"/>
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border-red-100 dark:border-neutral-800 dark:bg-neutral-900">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Sword className="text-red-600"/> Script Death Oath</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="death-price">
+                <AccordionTrigger>Daftar Harga</AccordionTrigger>
+                <AccordionContent>
+                  <ul className="space-y-2">
+                    {DEATH_OATH.map((it, i) => (
+                      <li key={i} className="flex items-center justify-between text-sm">
+                        <span>{it.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{CURRENCY.format(it.price)}</span>
+                          <Button size="sm" asChild>
+                            <a href={waLink(`Saya mau pesan ${it.name} (${CURRENCY.format(it.price)})`)}>Pesan</a>
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => copy(`${it.name} - ${CURRENCY.format(it.price)}`)}>
+                            <Copy className="w-4 h-4"/>
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </section>
+
+  {/* Jasa & Layanan */}
+  <section id="jasa" className="mx-auto max-w-6xl px-4 py-12">
+    <h2 className="text-2xl md:text-3xl font-bold mb-6">Jasa & Layanan</h2>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {SERVICES.map((s, i) => (
+        <Card key={i} className="rounded-2xl hover:shadow-lg transition dark:bg-neutral-900 dark:border-neutral-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Server className="text-red-600"/> {s.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-sm text-neutral-600 dark:text-neutral-400">
+              {typeof s.price === "number" ? (
+                <span className="font-semibold text-neutral-800 dark:text-neutral-200">{CURRENCY.format(s.price)}</span>
+              ) : (
+                <span className="font-semibold text-neutral-800 dark:text-neutral-200">{s.priceRange}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" asChild>
+                <a href={waLink(`Saya mau pesan ${s.name} (${typeof s.price === 'number' ? CURRENCY.format(s.price) : s.priceRange})`)}>Pesan</a>
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => copy(`${s.name} - ${typeof s.price === 'number' ? CURRENCY.format(s.price) : s.priceRange}`)}>
+                <Copy className="w-4 h-4"/>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </section>
+
+  {/* Pembayaran */}
+  <section id="pembayaran" className="mx-auto max-w-6xl px-4 py-12">
+    <h2 className="text-2xl md:text-3xl font-bold mb-6">Metode Pembayaran</h2>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {PAYMENTS.map((p, i) => (
+        <Card key={i} className="rounded-2xl dark:bg-neutral-900 dark:border-neutral-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="text-red-600"/> {p.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <span className="font-mono">{p.number}</span>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => copy(`${p.name} ${p.number}`)}>Salin</Button>
+              <Button size="sm" asChild>
+                <a href={waLink(`Konfirmasi pembayaran via ${p.name} (${p.number})`)}>
+                  Chat <MessageSquare className="w-4 h-4 ml-1"/>
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-3">Catatan: Logo resmi tidak ditampilkan untuk menghindari pelanggaran merek; nama metode & nomor tujuan tercantum jelas.</p>
+  </section>
+
+  {/* Kontak */}
+  <section id="kontak" className="bg-red-600/5 dark:bg-neutral-900/40 border-t border-red-100 dark:border-neutral-800">
+    <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
+      <div>
+        <h3 className="text-2xl font-bold">Butuh bantuan cepat?</h3>
+        <p className="text-neutral-700 dark:text-neutral-300 mt-2">Tim DANS4YOU siap membantu kebutuhan Anda. Klik tombol di bawah untuk chat WhatsApp.</p>
+        <div className="mt-4 flex gap-3">
+          <Button asChild className="bg-red-600 hover:bg-red-700 text-white">
+            <a href={waLink("Halo, saya ingin konsultasi/menanyakan produk DANS4YOU")}>Chat WhatsApp</a>
+          </Button>
+          <Button variant="outline" className="dark:border-neutral-700" onClick={() => copy(WA_NUMBER)}>Salin Nomor</Button>
+        </div>
+      </div>
+      <div className="rounded-3xl bg-gradient-to-br from-red-600 to-red-400 dark:from-red-700 dark:to-red-500 p-1 shadow-xl">
+        <div className="rounded-3xl bg-white/10 dark:bg-black/20 backdrop-blur p-8 text-white">
+          <div className="text-3xl font-extrabold">DANS4YOU</div>
+          <div className="mt-2 text-white/90">Toko produk & jasa digital</div>
+          <div className="mt-4 text-sm text-white/80">WhatsApp: +{WA_NUMBER}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Footer */}
+  <footer className="border-t border-red-100 dark:border-neutral-800">
+    <div className="mx-auto max-w-6xl px-4 py-6 text-sm flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="text-neutral-600 dark:text-neutral-400">© {new Date().getFullYear()} DANS4YOU. All rights reserved.</div>
+      <div className="text-neutral-500 dark:text-neutral-400">Theme merah • React + Tailwind + Framer Motion • Dark/Light mode</div>
+    </div>
+  </footer>
+
+  {toast && (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow flex items-center gap-2">
+      <CheckCircle className="w-4 h-4"/>
+      <span>{toast}</span>
+    </motion.div>
+  )}
+</div>
+
+); }
+
     <CardHeader><CardTitle><Bot className="inline w-5 h-5 mr-2 text-red-600"/> Harga Script Ochobot</CardTitle></CardHeader>
     <CardContent>
       {hargaOchobot.map((item, idx) => (
