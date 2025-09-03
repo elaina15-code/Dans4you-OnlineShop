@@ -1,0 +1,93 @@
+import React, { useEffect, useMemo, useState } from "react"; import { motion } from "framer-motion"; import { Copy, CheckCircle, PenLine, Smartphone, Palette, Shirt, Megaphone, Image, Globe, Server, Bot, Sword } from "lucide-react"; import { Button } from "@/components/ui/button"; import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const CURRENCY = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" });
+
+export default function App() { const [toast, setToast] = useState("");
+
+function handleCopy(text) { navigator.clipboard.writeText(text); setToast("Tersalin: " + text); setTimeout(() => setToast(""), 2000); }
+
+const hargaNokos = [ {name:"NOKOS INDONESIA", price:6000}, {name:"NOKOS PHILIPINA", price:8000}, {name:"NOKOS MALAYSIA", price:20000}, ];
+
+const hargaOchobot = [ {name:"OCHOBOT ENC V1", price:10000}, {name:"OCHOBOT ENC V2", price:15000}, {name:"OCHOBOT NO ENC V1", price:15000}, {name:"OCHOBOT NO ENC V2", price:20000}, ];
+
+const hargaDeathOath = [ {name:"DEATH OATH V3 VIA TELE", price:10000}, {name:"DEATH OATH V3.2 VIA TELE", price:15000}, ];
+
+const jasaLayanan = [ {name:"Jasa Rename Script", price:10000, icon:<PenLine className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Rename Aplikasi", price:10000, icon:<Smartphone className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Design Logo", price:30000, icon:<Palette className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Design Baju", price:20000, icon:<Shirt className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Push Channel WA", price:"Rp5.000 - Rp50.000", icon:<Megaphone className="w-4 h-4 inline mr-1"/>}, {name:"Jasa Design Poster", price:25000, icon:<Image className="w-4 h-4 inline mr-1"/>}, ];
+
+return ( <div className="min-h-screen bg-red-50 text-neutral-800 p-4"> <h1 className="text-3xl font-bold text-red-700 mb-6 text-center">Daftar Harga Produk</h1>
+
+{/* Card Harga Nokos */}
+  <Card className="mt-6">
+    <CardHeader><CardTitle><Globe className="inline w-5 h-5 mr-2 text-red-600"/> Harga Nokos</CardTitle></CardHeader>
+    <CardContent>
+      {hargaNokos.map((item, idx) => (
+        <div key={idx} className="flex items-center justify-between border-b py-2">
+          <span>{item.name} - {CURRENCY.format(item.price)}</span>
+          <div className="space-x-2">
+            <Button size="sm" onClick={()=>window.open(`https://wa.me/62881011892305?text=Saya%20mau%20pesan%20${item.name}%20(${CURRENCY.format(item.price)})`, "_blank")}>Pesan Sekarang</Button>
+            <Button size="sm" variant="outline" onClick={()=>handleCopy(`${item.name} - ${CURRENCY.format(item.price)}`)}><Copy className="w-4 h-4"/></Button>
+          </div>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+
+  {/* Card Harga Script Ochobot */}
+  <Card className="mt-6">
+    <CardHeader><CardTitle><Bot className="inline w-5 h-5 mr-2 text-red-600"/> Harga Script Ochobot</CardTitle></CardHeader>
+    <CardContent>
+      {hargaOchobot.map((item, idx) => (
+        <div key={idx} className="flex items-center justify-between border-b py-2">
+          <span>{item.name} - {CURRENCY.format(item.price)}</span>
+          <div className="space-x-2">
+            <Button size="sm" onClick={()=>window.open(`https://wa.me/62881011892305?text=Saya%20mau%20pesan%20${item.name}%20(${CURRENCY.format(item.price)})`, "_blank")}>Pesan Sekarang</Button>
+            <Button size="sm" variant="outline" onClick={()=>handleCopy(`${item.name} - ${CURRENCY.format(item.price)}`)}><Copy className="w-4 h-4"/></Button>
+          </div>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+
+  {/* Card Harga Script Death Oath */}
+  <Card className="mt-6">
+    <CardHeader><CardTitle><Sword className="inline w-5 h-5 mr-2 text-red-600"/> Harga Script Death Oath</CardTitle></CardHeader>
+    <CardContent>
+      {hargaDeathOath.map((item, idx) => (
+        <div key={idx} className="flex items-center justify-between border-b py-2">
+          <span>{item.name} - {CURRENCY.format(item.price)}</span>
+          <div className="space-x-2">
+            <Button size="sm" onClick={()=>window.open(`https://wa.me/62881011892305?text=Saya%20mau%20pesan%20${item.name}%20(${CURRENCY.format(item.price)})`, "_blank")}>Pesan Sekarang</Button>
+            <Button size="sm" variant="outline" onClick={()=>handleCopy(`${item.name} - ${CURRENCY.format(item.price)}`)}><Copy className="w-4 h-4"/></Button>
+          </div>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+
+  {/* Bagian Jasa & Layanan */}
+  <h1 className="text-3xl font-bold text-red-700 mt-10 mb-6 text-center">Daftar Jasa & Layanan</h1>
+  <Card className="mt-6">
+    <CardHeader><CardTitle><Server className="inline w-5 h-5 mr-2 text-red-600"/> Jasa & Layanan</CardTitle></CardHeader>
+    <CardContent>
+      {jasaLayanan.map((item, idx) => (
+        <div key={idx} className="flex items-center justify-between border-b py-2">
+          <span>{item.icon}{item.name} - {typeof item.price === "number" ? CURRENCY.format(item.price) : item.price}</span>
+          <div className="space-x-2">
+            <Button size="sm" onClick={()=>window.open(`https://wa.me/62881011892305?text=Saya%20mau%20pesan%20${item.name}%20(${typeof item.price === "number" ? CURRENCY.format(item.price) : item.price})`, "_blank")}>Pesan Sekarang</Button>
+            <Button size="sm" variant="outline" onClick={()=>handleCopy(`${item.name} - ${typeof item.price === "number" ? CURRENCY.format(item.price) : item.price}`)}><Copy className="w-4 h-4"/></Button>
+          </div>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+
+  {toast && (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow flex items-center space-x-2">
+      <CheckCircle className="w-4 h-4"/>
+      <span>{toast}</span>
+    </motion.div>
+  )}
+</div>
+
+); }
+
